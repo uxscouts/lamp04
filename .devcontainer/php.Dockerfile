@@ -5,6 +5,7 @@ FROM php:8.2-apache
 RUN apt-get update && apt-get install -y \
     libmariadb-dev \
     git \
+    docker.io \
     && docker-php-ext-install pdo pdo_mysql mysqli \
     && docker-php-ext-enable pdo_mysql
 

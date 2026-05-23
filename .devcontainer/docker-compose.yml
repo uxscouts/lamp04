@@ -2,14 +2,18 @@ version: '3.8'
 services:
   # PHP Backend
   app:
-    build: 
+    build:
       context: .
       dockerfile: php.Dockerfile
     volumes:
       - ..:/workspaces:cached
     environment:
       - DB_HOST=db
-    network_mode: service:db # Shares network with DB for easy access
+      - DOCKER_HOST=tcp://docker:2375
+      - DOCKER_TLS_CERTDIR=
+    depends_on:
+      - db
+      - docker
 
   # MySQL Database
   db:
@@ -29,3 +33,14 @@ services:
     volumes:
       - ..:/workspaces:cached
     command: /bin/sh -c "while sleep 1000; do :; done" # Keeps container alive
+
+  # Docker-in-Docker daemon
+  docker:
+    image: docker:24-dind
+    privileged: true
+    command: ["dockerd-entrypoint.sh", "--host=tcp://0.0.0.0:2375", "--host=unix:///var/run/docker.sock"]
+    volumes:
+      - docker-data:/var/lib/docker
+
+volumes:
+  docker-data:
